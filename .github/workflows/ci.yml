@@ -429,7 +429,7 @@ jobs:
       # watch list — do not shorten it, and do not treat a red audit on any of
       # them as a mystery:
       #
-      #     fast-uri 3.1.5, brace-expansion 2.1.4 (nested, via filelist),
+      #     fast-uri 3.1.7, brace-expansion 2.1.4 (nested, via filelist),
       #     shell-quote 1.9.0, filelist 1.0.6, nanoid 3.3.18
       #
       #   - The first four sit at or near the LAST patch of an older line, and

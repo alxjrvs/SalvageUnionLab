@@ -1,0 +1,80 @@
+# Read-only probe of the production hostnames from a runner with open egress.
+#
+# Exists because the answer to "is it really serving from Cloudflare?" should
+# be a header, not a memory. Prints status line, `server`, `cf-ray`, redirect
+# target and whether CSP/HSTS arrived, for every production surface plus the
+# decommissioned Netlify hostnames, and then the authoritative NS records for
+# both zones. It checks out nothing and holds no secrets.
+#
+# Trigger it from the "Run workflow" button, or
+#   gh workflow run probe-production.yml
+# It also runs on any pull request that edits this file, which is what makes a
+# workflow_dispatch-only workflow dispatchable in the first place: GitHub does
+# not register a workflow that exists only on a branch until it has run once.
+name: Probe production
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/probe-production.yml
+  workflow_dispatch:
+    inputs:
+      extra_urls:
+        description: 'Extra URLs to probe, space-separated'
+        required: false
+        default: ''
+
+permissions: {}
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: HTTP headers per surface
+        env:
+          EXTRA: ${{ inputs.extra_urls }}
+        run: |
+          probe() {
+            local url="$1"
+            echo "== $url"
+            local hdrs
+            if ! hdrs=$(curl -sS -o /dev/null -D - --max-time 20 "$url" 2>&1); then
+              echo "   request failed: $hdrs"
+              return 0
+            fi
+            printf '%s\n' "$hdrs" \
+              | tr -d '\r' \
+              | grep -i -E '^(HTTP/|server:|cf-ray:|cf-cache-status:|location:|x-nf-request-id:|x-render-origin-server:|via:|content-security-policy:|strict-transport-security:)' \
+              | sed -E 's/^([Cc]ontent-[Ss]ecurity-[Pp]olicy):.*/\1: <present>/' \
+              | sed 's/^/   /' || true
+          }
+          for u in \
+            https://salvageunion.io/ \
+            https://www.salvageunion.io/ \
+            https://intheunionnow.com/ \
+            https://www.intheunionnow.com/ \
+            https://intheunionnow.com/api/snapshots \
+            https://assets.salvageunion.io/chassis/mule.webp \
+            https://su-srd.alxjrvs.workers.dev/ \
+            https://su-itun.alxjrvs.workers.dev/ \
+            https://su-assets.alxjrvs.workers.dev/ \
+            https://su-discord-bot.alxjrvs.workers.dev/health \
+            https://suindex.netlify.app/ \
+            https://in-the-union-now.netlify.app/ \
+            https://main--suindex.netlify.app/
+          do probe "$u"; done
+          for u in $EXTRA; do probe "$u"; done
+
+      - name: Bot health body
+        run: curl -sS --max-time 20 https://su-discord-bot.alxjrvs.workers.dev/health; echo
+
+      - name: Authoritative DNS
+        run: |
+          for z in salvageunion.io intheunionnow.com; do
+            echo "== NS $z"; dig +short NS "$z" | sort | sed 's/^/   /'
+            echo "== A  $z"; dig +short A "$z" | sort | sed 's/^/   /'
+          done
+          for h in www.salvageunion.io assets.salvageunion.io www.intheunionnow.com; do
+            echo "== $h"; dig +short "$h" | sed 's/^/   /'
+          done

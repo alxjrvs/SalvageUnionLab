@@ -34,7 +34,7 @@
   "overrides": {
     "@discordjs/rest": "^2.6.3",
     "@opentelemetry/core": "^2.8.0",
-    "fast-uri": ">=3.1.6",
+    "fast-uri": ">=3.1.6 <4",
     "filelist": ">=1.0.6",
     "nanoid": ">=3.3.18",
     "shell-quote": ">=1.9.0"
