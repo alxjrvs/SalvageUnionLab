@@ -1,8 +1,10 @@
 /**
- * The `/su roll` and `/su check` surfaces, as Components V2 containers.
+ * The `/su roll` surface, as a Components V2 container.
  *
- * Replaces `buildRollEmbedData` / `buildCheckEmbedData` in `format.ts`, which
- * are kept for now only until the other surfaces move across.
+ * Replaced `buildRollEmbedData` / `buildCheckEmbedData` in `format.ts`, both of
+ * which are now deleted — nothing on any surface sends `embeds:` any more. The
+ * `EmbedData` builders in `gameEmbed.ts` and `lookupEmbed.ts` survive as pure
+ * data, mapped onto blocks by their container adapters.
  *
  * ## The problem this fixes
  *
@@ -40,7 +42,8 @@
  * what you rolled rather than consistent across every roll.
  *
  * The die number now stands on its own in the headline, which is where it was
- * always meant to be read. Tier is carried by the accent stripe and the word.
+ * always meant to be read, separated from the outcome by an em dash — see
+ * {@link rollHeadline}. Tier is carried by the accent stripe and the word.
  *
  * ## Why the tier word is Core-Mechanic-only
  *
@@ -56,7 +59,6 @@
  * label says what actually happened instead of a borrowed tier noun.
  */
 
-import type { RollerRollResult } from '@randsum/roller'
 import type { RollOnTableOutcome, SURefRollTable } from 'salvageunion-reference'
 import { getEntitySlug, srdEntityUrl } from 'salvageunion-reference'
 import type { CoreRollBand } from 'salvageunion-reference/rules'
@@ -116,6 +118,26 @@ function loggedLine(game: string): string {
 }
 
 /**
+ * `## 14 — SUCCESS`, or `## 14` when there is nothing to say beside the die.
+ *
+ * ## Why an em dash
+ *
+ * `## 14 SUCCESS` ran the two together as one string: a reader looking for the
+ * die and a reader looking for the outcome both had to parse the whole line to
+ * find their half. Discord paints no colour inside a TextDisplay and a heading
+ * is already bold, so weight and hue are both unavailable — punctuation is the
+ * only break this surface has, and an em dash is the widest one that renders
+ * identically everywhere.
+ *
+ * One choke point deliberately: every headline on every roll surface comes
+ * through here, so the separator cannot drift between them. `errorContainer.ts`
+ * imports it for the same reason.
+ */
+export function rollHeadline(die: string, rest?: string): string {
+  return rest !== undefined && rest.length > 0 ? `## ${die} — ${rest}` : `## ${die}`
+}
+
+/**
  * Headline + optional body, per the three-branch rule above.
  *
  * `band` is null on an untiered table, which is also what withholds the tier
@@ -129,10 +151,10 @@ function headlineAndBody(
   isCoreMechanic: boolean
 ): { headline: string; body?: string } {
   if (label !== undefined && label.length > 0) {
-    return { headline: `## ${die} ${stencil(label)}`, body: value || undefined }
+    return { headline: rollHeadline(die, stencil(label)), body: value || undefined }
   }
   if (value.length > 0 && value.length <= INLINE_HEADLINE_MAX) {
-    return { headline: `## ${die} ${stencil(value)}` }
+    return { headline: rollHeadline(die, stencil(value)) }
   }
   // The entry's own words, where they already read as a name. Never a
   // truncation and never a paraphrase — see derivedLabel.ts.
@@ -140,10 +162,10 @@ function headlineAndBody(
   if (quoted !== undefined) {
     // The remainder, not the whole value — the quoted sentence has been
     // promoted to the headline and must not be repeated beneath it.
-    return { headline: `## ${die} ${stencil(quoted.label)}`, body: quoted.rest }
+    return { headline: rollHeadline(die, stencil(quoted.label)), body: quoted.rest }
   }
-  const tier = band !== null && isCoreMechanic ? ` ${stencil(CORE_ROLL_BANDS[band].label)}` : ''
-  return { headline: `## ${die}${tier}`, body: value || undefined }
+  const tier = band !== null && isCoreMechanic ? stencil(CORE_ROLL_BANDS[band].label) : undefined
+  return { headline: rollHeadline(die, tier), body: value || undefined }
 }
 
 /**
@@ -201,60 +223,4 @@ export function buildRollContainerData(
 /** The reference-site page for a roll table, for the `See table` link button. */
 export function rollTableUrl(table: SURefRollTable): string {
   return srdEntityUrl('roll-tables', getEntitySlug(table))
-}
-
-/**
- * A bare `1d20` is the player invoking the Core Mechanic, so it earns the full
- * treatment. Deliberately *bare*: Salvage Union reads the die raw and has no
- * `+N` modifiers, so tiering `1d20+5` would be a rules error dressed as a
- * feature.
- */
-export function isBareD20(notation: string): boolean {
-  return /^\s*1?d20\s*$/i.test(notation)
-}
-
-/** Shape a `/su check` roll into container data. */
-export function buildCheckContainerData(
-  notation: string,
-  result: RollerRollResult<unknown>,
-  context: RollContext = {}
-): ContainerData {
-  const values = result.values.map((v) => String(v))
-  const total = result.total
-
-  const bare = isBareD20(notation) && values.length === 1
-  const band = bare ? coreRollBand(total) : null
-
-  const blocks: ContainerBlock[] = [
-    { kind: 'text', content: contextLine(notation, context.roller) },
-  ]
-
-  const tier = band !== null ? ` ${stencil(CORE_ROLL_BANDS[band].label)}` : ''
-  blocks.push({ kind: 'text', content: `## ${total}${tier}` })
-  // The band's own sentence, in the body slot a table roll's value occupies.
-  // It used to sit in the footer above the attribution, which put two lines of
-  // small print under every check and buried real rules text in boilerplate.
-  if (band !== null) blocks.push({ kind: 'text', content: CORE_ROLL_BANDS[band].summary })
-
-  // Individual dice as inline code spans: each renders in a monospace box, so
-  // the run reads as a row of small plates and wraps naturally at any width —
-  // which is what 10d6 needs and a comma-joined field value never gave.
-  if (!bare && values.length > 0) {
-    const shown = values.slice(0, 40)
-    const overflow = values.length - shown.length
-    const dice = shown.map((v) => `\`${v}\``).join(' ')
-    blocks.push({
-      kind: 'text',
-      content: overflow > 0 ? `${dice} -# +${overflow} more` : dice,
-    })
-  }
-
-  blocks.push({ kind: 'separator' })
-  blocks.push({ kind: 'text', content: `-# ${ROLL_ATTRIBUTION}` })
-
-  if (context.loggedTo !== undefined) {
-    blocks.push({ kind: 'text', content: loggedLine(context.loggedTo) })
-  }
-
-  return { accent: band !== null ? ROLL_COLORS[band] : NEUTRAL_EMBED_COLOR, blocks }
 }

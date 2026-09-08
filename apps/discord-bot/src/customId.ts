@@ -32,9 +32,9 @@ const CUSTOM_ID_MAX = 100
 /**
  * The actions a button can re-invoke. `roll` re-rolls a named Salvage Union
  * table (shared by the roll subcommand's result and the lookup embed's
- * "Roll on this table" button); `check` re-rolls a free-form dice notation;
- * `lookup` returns the `/su lookup` embed for a named roll-table (the "See
- * table" button on a roll result); `post` re-renders a PRIVATE roll publicly.
+ * "Roll on this table" button); `lookup` returns the `/su lookup` embed for a
+ * named roll-table (the "See table" button on a roll result); `post`
+ * re-renders a PRIVATE roll publicly.
  *
  * `post` is the one action whose payload is a RESULT rather than a request.
  * Every other button re-rolls, which is correct for them and wrong here: a
@@ -44,7 +44,7 @@ const CUSTOM_ID_MAX = 100
  * backend — `resultForTable` is pure, so the same table and the same die give
  * the same entry forever.
  */
-export type ButtonAction = 'roll' | 'check' | 'lookup' | 'post'
+export type ButtonAction = 'roll' | 'lookup' | 'post'
 
 export type ParsedCustomId = { action: ButtonAction; payload: string }
 
@@ -64,7 +64,7 @@ export function parseCustomId(customId: string): ParsedCustomId | null {
   const parts = customId.split(':')
   if (parts.length < 3 || parts[0] !== CUSTOM_ID_NS) return null
   const action = parts[1]
-  if (action !== 'roll' && action !== 'check' && action !== 'lookup' && action !== 'post') {
+  if (action !== 'roll' && action !== 'lookup' && action !== 'post') {
     return null
   }
   return { action, payload: parts.slice(2).join(':') }

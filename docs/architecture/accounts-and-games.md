@@ -138,7 +138,8 @@ The bot authenticates as a participant rather than an admin; rolls made in
 Discord land as Change Log entries.
 
 Built end-to-end: `/su me`, `/su games`, `/su shelf`, `/su crew`, `/su sheet`,
-`/su game bind|unbind|info`, and roll attribution on `/su roll` and `/su check`.
+`/su game bind|unbind|info`, and roll attribution on `/su roll` (`/su check`
+carried it too, until that command was removed).
 The bot reaches Convex through a `/bot/*` HTTP route carrying a bearer
 credential that authenticates the **bot**, never the **actor** — every call
 still resolves its actor from a linked Discord id and runs the same

@@ -10,7 +10,6 @@
  */
 
 import { MessageFlags } from 'discord-api-types/v10'
-import { buildCheckMessage } from './commands/check.js'
 import type { CommandButtonInteraction } from './commands/interactions.js'
 import { buildTableLookupMessage } from './commands/lookup.js'
 import { buildPostedRollMessage, buildRollMessage } from './commands/roll.js'
@@ -57,9 +56,7 @@ export async function handleButtonInteraction(
   const message =
     parsed.action === 'roll'
       ? buildRollMessage(parsed.payload, roller)
-      : parsed.action === 'check'
-        ? buildCheckMessage(parsed.payload, roller)
-        : buildTableLookupMessage(parsed.payload)
+      : buildTableLookupMessage(parsed.payload)
 
   if ('error' in message) {
     await interaction.reply({ content: message.error, flags: MessageFlags.Ephemeral })
@@ -75,11 +72,9 @@ export async function handleButtonInteraction(
   // Change Log quietly disagreed with the channel about what happened at the
   // table — and "why is my re-roll missing?" is a worse question than any this
   // saves. `lookup` is not a roll and is deliberately excluded.
-  if (parsed.action === 'roll' || parsed.action === 'check') {
-    const description =
-      parsed.action === 'roll' ? `Rolled on ${parsed.payload}` : `Rolled ${parsed.payload}`
-    if (data !== undefined) {
-      await attributeRoll(interaction, data, description, { rerolled: parsed.payload })
-    }
+  if (parsed.action === 'roll' && data !== undefined) {
+    await attributeRoll(interaction, data, `Rolled on ${parsed.payload}`, {
+      rerolled: parsed.payload,
+    })
   }
 }

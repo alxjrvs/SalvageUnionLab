@@ -22,6 +22,7 @@ import { searchIn } from 'salvageunion-reference'
 import type { ButtonSpec, ContainerData } from './container.js'
 import { makeCustomId } from './customId.js'
 import { NEUTRAL_EMBED_COLOR } from './format.js'
+import { rollHeadline } from './rollContainer.js'
 
 /** How many recovery buttons to offer. Three fits one row without crowding. */
 const SUGGESTIONS = 3
@@ -66,26 +67,6 @@ export function unknownTableContainer(query: string, indexed: number): Container
   }
 }
 
-/** `/su check` was handed something randsum could not parse. */
-export function badNotationContainer(notation: string, reason: string): ContainerData {
-  const examples = ['2d6+3', '1d20', '4d6L']
-  const buttons = examples.flatMap((example) => {
-    const customId = makeCustomId('check', example)
-    return customId ? [{ kind: 'action' as const, customId, label: example }] : []
-  })
-  return {
-    accent: NEUTRAL_EMBED_COLOR,
-    blocks: [
-      { kind: 'text', content: '-# BAD NOTATION' },
-      { kind: 'text', content: `## \`${notation}\`` },
-      { kind: 'text', content: reason },
-      { kind: 'separator' },
-      { kind: 'text', content: '-# try one of these, or see randsum.dev for the full grammar' },
-      { kind: 'buttons', buttons },
-    ],
-  }
-}
-
 /**
  * A roll that matched no entry on a well-formed table.
  *
@@ -113,7 +94,7 @@ export function noEffectContainer(
     accent: NEUTRAL_EMBED_COLOR,
     blocks: [
       { kind: 'text', content: roller ? `-# ${name} · rolled by ${roller}` : `-# ${name}` },
-      { kind: 'text', content: `## ${roll} NO EFFECT` },
+      { kind: 'text', content: rollHeadline(String(roll), 'NO EFFECT') },
       { kind: 'separator' },
       { kind: 'text', content: '-# this table only triggers on a 20' },
       ...(buttons.length > 0 ? [{ kind: 'buttons' as const, buttons }] : []),

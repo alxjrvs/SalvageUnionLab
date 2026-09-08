@@ -83,9 +83,8 @@ export function setItunClientForTests(next: ItunClient | null): () => void {
 export const SOLO_NOTICE = [
   '**This server isn’t connected to In The Union Now.**',
   '',
-  'Rolling and reference lookups work as normal — `/su roll`, `/su check`,',
-  '`/su lookup`. Game commands need the bot to be configured for an ITUN',
-  'deployment.',
+  'Rolling and reference lookups work as normal — `/su roll` and `/su lookup`.',
+  'Game commands need the bot to be configured for an ITUN deployment.',
 ].join('\n')
 
 /**

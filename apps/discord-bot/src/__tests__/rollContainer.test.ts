@@ -143,6 +143,26 @@ describe('every roll renders the same furniture', () => {
     expect(headline(rollOf('Callsign Table', 1))).toContain('1·1')
   })
 
+  test('an em dash separates the die from the outcome', () => {
+    // `## 14 SUCCESS` ran the two together as one string. Discord paints no
+    // colour inside a TextDisplay and a heading is already bold, so punctuation
+    // is the only break available — and nothing else in the suite pins it.
+    expect(headline(rollOf('Core Mechanic', 14))).toBe('## 14 — SUCCESS')
+    expect(headline(rollOf('Core Mechanic', 20))).toBe('## 20 — NAILED IT')
+  })
+
+  test('no dangling dash when the die is all there is to say', () => {
+    // An untiered table with a long unquotable entry has no word to put beside
+    // the number, and `## 7 — ` would be worse than the bare number.
+    for (const table of SalvageUnionReference.RollTables.all()) {
+      for (let roll = 1; roll <= 20; roll++) {
+        const outcome = rollOnTable(table.table, () => roll)
+        if (!outcome.success) continue
+        expect(headline(buildRollContainerData(table, outcome))).not.toMatch(/—\s*$/)
+      }
+    }
+  })
+
   test('one footer line, and it is the attribution', () => {
     // The provenance line — `d20 14 · band 11-19 · Core Book p.219` — is gone;
     // two lines of small print under every roll was the busiest part of the

@@ -529,7 +529,7 @@ is what makes the signature check able to succeed at all.
 **No Game-command regression, because there is none to lose.** The Worker reports
 `mode: solo`, and so was Render: `render.yaml` declares `ITUN_CONVEX_SITE_URL`
 and `ITUN_BOT_SECRET` as `sync: false`, and neither was ever set — on Render or
-in Convex. Reference commands (`/su roll`, `/su check`, `/su lookup`) behave
+in Convex. Reference commands (`/su roll`, `/su lookup`) behave
 identically; Game commands said "not connected" before and still do.
 
 **This one WAS reversible, unlike the DNS flip** — clearing the Interactions

@@ -55,7 +55,7 @@ against a linked account and a real membership. See
 - `src/commands/itunReply.ts` — the shared defer / three-mode / ephemerality spine
 
 **Three modes, mirroring the app's.** `ITUN_CONVEX_SITE_URL` +
-`ITUN_BOT_SECRET` unset ⇒ **Solo**: `/su roll`, `/su check` and `/su lookup`
+`ITUN_BOT_SECRET` unset ⇒ **Solo**: `/su roll` and `/su lookup`
 behave exactly as they did before accounts existed, and the Game commands say
 they are not connected. Configured but unreachable ⇒ **Degraded**, worded as an
 outage rather than a permissions problem. `src/__tests__/soloMode.test.ts` is

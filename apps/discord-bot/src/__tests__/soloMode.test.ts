@@ -9,7 +9,7 @@ import { fakeExecute } from './fakeInteraction.js'
 /**
  * **Solo mode must never regress.**
  *
- * The reference bot — roll, check, lookup — is the thing people already use,
+ * The reference bot — roll and lookup — is the thing people already use,
  * and ADR-030's first principle is that adding accounts must not gate or alter
  * anything that worked without them. The bot mirrors the app's storage modes,
  * and Solo (no ITUN deployment configured) is what almost every install is.

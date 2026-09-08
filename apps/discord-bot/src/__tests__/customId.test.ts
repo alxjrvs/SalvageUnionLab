@@ -5,11 +5,10 @@
  * The router (interactionCreate.test.ts) covers the happy dispatch; these pin
  * the encoding contract directly: the namespaced roundtrip, rejection of
  * foreign / malformed ids, and the 100-char cap that makes `rollAgainRow`
- * return null (an over-long-but-valid /su check expression must still roll —
- * just without a re-roll button).
+ * return null (an over-long payload must still render — just without a
+ * re-roll button).
  */
 import { describe, expect, test } from 'bun:test'
-import { buildCheckMessage } from '../commands/check.js'
 import { makeCustomId, parseCustomId, rollAgainRow, rollResultRow } from '../customId.js'
 
 describe('makeCustomId / parseCustomId', () => {
@@ -21,9 +20,9 @@ describe('makeCustomId / parseCustomId', () => {
   })
 
   test('preserves a payload that itself contains colons', () => {
-    const id = makeCustomId('check', '2d6:weird')
+    const id = makeCustomId('roll', 'Odd: Table')
     if (!id) throw new Error('expected a customId')
-    expect(parseCustomId(id)).toEqual({ action: 'check', payload: '2d6:weird' })
+    expect(parseCustomId(id)).toEqual({ action: 'roll', payload: 'Odd: Table' })
   })
 
   test('roundtrips the lookup action (the "See table" button)', () => {
@@ -41,8 +40,8 @@ describe('makeCustomId / parseCustomId', () => {
 
   test('returns null when the id would exceed the 100-char cap', () => {
     const huge = 'x'.repeat(120)
-    expect(makeCustomId('check', huge)).toBeNull()
-    expect(rollAgainRow('check', huge, 'Roll again')).toBeNull()
+    expect(makeCustomId('roll', huge)).toBeNull()
+    expect(rollAgainRow('roll', huge, 'Roll again')).toBeNull()
   })
 })
 
@@ -86,21 +85,5 @@ describe('rollResultRow', () => {
 
   test('drops both buttons when the table name overflows the customId cap', () => {
     expect(rollResultRow('x'.repeat(120))).toBeNull()
-  })
-})
-
-describe('buildCheckMessage — over-cap notation', () => {
-  test('a valid but over-long expression still rolls, but drops the re-roll button', () => {
-    // Chain enough +1s to push `su:check:<notation>` past 100 chars while
-    // staying valid randsum notation.
-    const notation = `1d20${'+1'.repeat(48)}`
-    expect(notation.length).toBeGreaterThan(91)
-    const message = buildCheckMessage(notation)
-    expect('error' in message).toBe(false)
-    if ('error' in message) return
-    // The roll still renders; only the button is dropped.
-    expect(message.components).toHaveLength(1)
-    // customId would exceed the cap, so no button block rides along.
-    expect(message.data.blocks.some((b) => b.kind === 'buttons')).toBe(false)
   })
 })

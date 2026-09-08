@@ -217,7 +217,7 @@ keeps it from becoming a second product:
 | **Connected** | `CONVEX_URL` + secret set         | Full surface.                                                                     |
 | **Degraded**  | Convex configured but unreachable | Reference commands keep working; Game commands say so, ephemerally.               |
 
-The rule this buys: **`/su roll`, `/su check` and `/su lookup` must behave
+The rule this buys: **`/su roll` and `/su lookup` must behave
 byte-identically whether or not Convex is configured.** The reference bot is the
 thing people already use; accounts must not be able to break it. Subcommands are
 always registered — a command that vanishes based on server config is harder to
@@ -248,7 +248,6 @@ subcommand groups on one command, up to 25 options.
 
 ```
 /su roll            (exists — gains attribution)
-/su check           (exists — gains attribution)
 /su lookup          (exists — unchanged)
 /su me                             → who am I, what am I in
 /su games                          → my Games
@@ -270,7 +269,7 @@ subcommand groups on one command, up to 25 options.
 
 ### Roll attribution is an upgrade, not a command
 
-`/su roll` and `/su check` gain **no options and no flag**. When the channel is
+`/su roll` gains **no options and no flag** for attribution. When the channel is
 bound and the invoker resolves to a member, the roll is recorded via
 `bot.recordRoll` and the embed footer gains ` · recorded to Tenacity`. Otherwise
 the output is what it is today, to the byte.
@@ -526,8 +525,8 @@ for a `share` action whenever it earns one.
 
 ### Phase 4 — Roll attribution ✅
 
-Footer + `recordRoll` on `/su roll` and `/su check`. **Closes #623's exit
-criterion.**
+Footer + `recordRoll` on `/su roll` (and `/su check`, which existed then and
+has since been removed). **Closes #623's exit criterion.**
 
 Two details the plan did not anticipate, both settled in
 `commands/rollAttribution.ts`:

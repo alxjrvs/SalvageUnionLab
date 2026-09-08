@@ -15,7 +15,6 @@
 
 import { SlashCommandBuilder } from '@discordjs/builders'
 import { gamesCommand, meCommand, shelfCommand } from './account.js'
-import { checkCommand } from './check.js'
 import { crewCommand, sheetCommand } from './crew.js'
 import { gameCommand } from './game.js'
 import type { CommandAutocompleteInteraction, CommandExecuteInteraction } from './interactions.js'
@@ -27,7 +26,6 @@ export const suCommand = {
     .setName('su')
     .setDescription('Salvage Union reference tools')
     .addSubcommand((sub) => rollCommand.subcommand(sub))
-    .addSubcommand((sub) => checkCommand.subcommand(sub))
     .addSubcommand((sub) => lookupCommand.subcommand(sub))
     // In The Union Now (ADR-030 Phase 6). Always registered, never conditional
     // on configuration: a command that vanishes depending on how the bot was
@@ -50,8 +48,6 @@ export const suCommand = {
     switch (interaction.options.getSubcommand()) {
       case 'roll':
         return rollCommand.execute(interaction)
-      case 'check':
-        return checkCommand.execute(interaction)
       case 'lookup':
         return lookupCommand.execute(interaction)
       case 'me':

@@ -23,8 +23,14 @@
 >   `-# Core Mechanic · <summary>` line the same way — the summary is real
 >   rules text, so it moved up into the body rather than being deleted.
 >
+> **`/su check` no longer exists (2026-09-06).** Every recommendation this
+> document makes for it — §4e, and rows 9 and 14 of the priority table — is
+> moot. The command was removed; `/su roll` and `/su lookup` are the whole
+> reference surface now.
+>
 > Everything else — the headline rule, tier gating, quoted labels, the Components
-> V2 move — shipped as written. Read `apps/discord-bot/src/rollContainer.ts`
+> V2 move — shipped as written, with the die separated from the outcome by an
+> em dash rather than run together with it. Read `apps/discord-bot/src/rollContainer.ts`
 > for the current surface; it is the source of truth.
 
 A design review of `/su roll` and `/su check`, with a prioritised change list.

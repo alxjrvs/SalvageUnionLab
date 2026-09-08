@@ -10,7 +10,7 @@ import { itun } from './itunReply.js'
  *
  * This is issue #623's exit criterion — *"a roll in Discord appears on the
  * table's Dashboard, attributed to the right player"* — and it is deliberately
- * **not a command**. `/su roll` and `/su check` gain no option and no flag; in
+ * **not a command**. `/su roll` gains no option and no flag for it; in
  * a bound channel their footer simply grows ` · recorded to Tenacity`. A
  * separate `/su gameroll` would be a worse product and a second thing to teach.
  *
