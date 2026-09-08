@@ -1,8 +1,10 @@
 /**
  * The `/su roll` surface, as a Components V2 container.
  *
- * Replaces `buildRollEmbedData` / `buildCheckEmbedData` in `format.ts`, which
- * are kept for now only until the other surfaces move across.
+ * Replaced `buildRollEmbedData` / `buildCheckEmbedData` in `format.ts`, both of
+ * which are now deleted — nothing on any surface sends `embeds:` any more. The
+ * `EmbedData` builders in `gameEmbed.ts` and `lookupEmbed.ts` survive as pure
+ * data, mapped onto blocks by their container adapters.
  *
  * ## The problem this fixes
  *
